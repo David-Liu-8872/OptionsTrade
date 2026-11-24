@@ -45,26 +45,32 @@ def _today_str() -> str:
     return _today_et().strftime("%Y-%m-%d")
 
 
-def is_us_options_market_open(dt_et: datetime | None = None) -> tuple[bool, str]:
+def is_us_options_market_open(
+    dt_et: datetime | None = None,
+    *,
+    allow_closing_settlement: bool = True,
+) -> tuple[bool, bool, str]:
     """
-    Strict US Options regular trading hours gate (America/New_York):
-      - Monday–Friday only
-      - Handles Thanksgiving (4th Thu of Nov), Black Friday 13:00 ET early close, Christmas Eve 13:00 ET, Christmas, New Year
-      - Regular window: 09:35 ET to 15:58 ET (skips first 5 mins of opening auction wide spreads)
+    Strict US Options trading & closing-settlement gate (America/New_York).
+    Returns (can_run, is_closing_settlement_only, message):
+      - Monday–Friday only (excluding NYSE holidays)
+      - Live trading window: 09:35 ET to 15:58 ET (early close 12:55 ET on Black Friday / Dec 24)
+      - Closing settlement grace window: up to 35 mins after market close (15:59–16:35 ET, or 12:56–13:30 ET)
+        so delayed GitHub Actions cron jobs still record the official closing-bell mark-to-market without opening new trades.
     """
     cur = dt_et or now_et()
     d = cur.date()
 
     if cur.weekday() >= 5:
-        return False, f"周末休市 (美东 {cur.strftime('%Y-%m-%d %A')})"
+        return False, False, f"周末休市 (美东 {cur.strftime('%Y-%m-%d %A')})"
 
     # Fixed / calendar NYSE holidays check
     if (d.month, d.day) in {(1, 1), (6, 19), (7, 4), (12, 25)}:
-        return False, f"美股节假日休市 ({d.isoformat()})"
+        return False, False, f"美股节假日休市 ({d.isoformat()})"
 
     # Thanksgiving: 4th Thursday of November
     if d.month == 11 and d.weekday() == 3 and 22 <= d.day <= 28:
-        return False, f"美股感恩节休市 ({d.isoformat()})"
+        return False, False, f"美股感恩节休市 ({d.isoformat()})"
 
     minutes = cur.hour * 60 + cur.minute
     open_min = 9 * 60 + 35  # 09:35 ET
@@ -72,15 +78,20 @@ def is_us_options_market_open(dt_et: datetime | None = None) -> tuple[bool, str]
     # Early close days (13:00 ET): Day after Thanksgiving & Dec 24
     is_black_friday = d.month == 11 and d.weekday() == 4 and 23 <= d.day <= 29
     is_christmas_eve = (d.month, d.day) == (12, 24)
-    close_min = (12 * 60 + 55) if (is_black_friday or is_christmas_eve) else (15 * 60 + 58)
+    close_min = (12 * 60 + 58) if (is_black_friday or is_christmas_eve) else (15 * 60 + 58)
+    grace_close_min = close_min + 37  # up to 16:35 ET (or 13:35 ET on early-close days)
 
-    if not (open_min <= minutes <= close_min):
-        return (
-            False,
-            f"当前非美股盘中交易时段 (美东 {cur.strftime('%H:%M')}，仅在 09:35–{close_min // 60:02d}:{close_min % 60:02d} ET 执行)",
-        )
+    if open_min <= minutes <= close_min:
+        return True, False, f"美股盘中正常交易时段 (美东 {cur.strftime('%Y-%m-%d %H:%M')} ET)"
 
-    return True, f"美股盘中正常交易时段 (美东 {cur.strftime('%Y-%m-%d %H:%M')} ET)"
+    if allow_closing_settlement and close_min < minutes <= grace_close_min:
+        return True, True, f"美股收盘结算宽限窗口 (美东 {cur.strftime('%Y-%m-%d %H:%M')} ET，仅收盘盯市不开新仓)"
+
+    return (
+        False,
+        False,
+        f"当前非美股交易时段 (美东 {cur.strftime('%H:%M')}，仅在 09:35–{close_min // 60:02d}:{close_min % 60:02d} ET 盘中及收盘结算窗口执行)",
+    )
 
 
 def _verify_live_quotes_healthy() -> bool:
@@ -387,10 +398,17 @@ def run_auto_sim_cycle(
     """
     state = load_or_init_sim_state(state_path)
 
+    is_closing_only = False
     if not force_when_closed:
-        is_open, msg = is_us_options_market_open()
+        is_open, is_closing_only, msg = is_us_options_market_open(allow_closing_settlement=True)
         if not is_open:
             return state, False, msg
+        if is_closing_only:
+            allow_new_entries = False
+            # Avoid duplicate closing settlement marks if already updated after 15:58 ET today
+            today_prefix = _today_str()
+            if state.last_updated_at.startswith(today_prefix) and state.last_updated_at[11:16] >= "15:59":
+                return state, False, f"今日收盘结算净值已记录 ({state.last_updated_at} ET)，自动跳过重复结算"
         if not _verify_live_quotes_healthy():
             return state, False, "检测到美股期权盘口未激活（买一价为 0 / 节假日休市），自动跳过本轮"
 
@@ -413,7 +431,12 @@ def run_auto_sim_cycle(
             chain_cache[ck] = _fetch_live_chain_lookup(pos.symbol, pos.expiration)
 
         marked = _mark_position_to_market(pos, spot_cache[pos.symbol], chain_cache[ck])
-        reason_code, reason_label = _check_exit_signal(marked, cfg)
+        if is_closing_only or (force_when_closed and not allow_new_entries):
+            reason_code, reason_label = (
+                ("EXPIRED", "到期自动交割结案") if marked.current_dte <= 0 else (None, None)
+            )
+        else:
+            reason_code, reason_label = _check_exit_signal(marked, cfg)
 
         if reason_code:
             closed_pos = marked.model_copy(

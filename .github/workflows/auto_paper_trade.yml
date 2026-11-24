@@ -2,9 +2,12 @@ name: US Options 30-Day Auto Paper Trader
 
 on:
   schedule:
-    # 美股交易日 (周一至周五) 开盘时段每 30 分钟自动巡查一次 (覆盖冬令时 EST 与夏令时 EDT):
-    # 代码内置 America/New_York 开盘时段门禁 (09:35-15:58 ET) 与节假日/盘口健康度校验，非开盘窗口秒级自动跳过
-    - cron: '10,40 13-20 * * 1-5'
+    # 美股交易日盘中每 30 分钟自动巡查 (采用原生美东时区 + 错峰质数分钟 :07/:37，避开 :00/:10/:30/:40 全球拥堵丢单)
+    - cron: '7,37 9-15 * * 1-5'
+      timezone: 'America/New_York'
+    # 美股收盘结算专班 (美东 16:07 ET，记录当日收盘最终净值，不开新仓)
+    - cron: '7 16 * * 1-5'
+      timezone: 'America/New_York'
   push:
     branches:
       - main
@@ -16,6 +19,14 @@ on:
     inputs:
       mark_only:
         description: '仅盯市与平仓结算（不开新仓）'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_when_closed:
+        description: '休市时段强制按最新收盘盘口刷新净值'
         required: false
         default: 'false'
         type: choice
@@ -64,9 +75,14 @@ jobs:
         run: |
           EXTRA_ARGS="--export-static"
           if [ "${{ github.event_name }}" = "push" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --mark-only"
-          elif [ "${{ github.event.inputs.mark_only }}" = "true" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --mark-only"
+            EXTRA_ARGS="$EXTRA_ARGS --skip-sim"
+          else
+            if [ "${{ github.event.inputs.mark_only }}" = "true" ]; then
+              EXTRA_ARGS="$EXTRA_ARGS --mark-only"
+            fi
+            if [ "${{ github.event.inputs.force_when_closed }}" = "true" ]; then
+              EXTRA_ARGS="$EXTRA_ARGS --force"
+            fi
           fi
           uv run --directory backend python scripts/run_auto_sim.py $EXTRA_ARGS
 
