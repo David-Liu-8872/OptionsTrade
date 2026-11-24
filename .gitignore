@@ -1,0 +1,19 @@
+# Python / uv
+__pycache__/
+*.py[cod]
+backend/.venv/
+backend/.moomoo_home/
+backend/data/*.db
+backend/data/*.db-journal
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/public/data/
+
+# OS / IDE
+.DS_Store
+*.log
+
+# Keep data/sim_portfolio.json tracked for GitHub Actions 30-day state!
+!data/sim_portfolio.json

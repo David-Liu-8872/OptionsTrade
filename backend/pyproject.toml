@@ -1,0 +1,15 @@
+[project]
+name = "options-trade-backend"
+version = "0.1.0"
+description = "US Low-Risk Options Screener & Moomoo Quantitative Engine"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "numpy>=2.0.0",
+    "pandas>=2.2.0",
+    "scipy>=1.14.0",
+    "yfinance>=0.2.50",
+    "moomoo-api>=9.0.0",
+]
