@@ -1,10 +1,10 @@
 {
   "started_at": "2026-11-24 11:23:37",
-  "last_updated_at": "2026-11-24 12:03:14",
+  "last_updated_at": "2026-11-24 12:04:19",
   "days_running": 1,
-  "total_runs": 3,
+  "total_runs": 4,
   "spy_entry_spot": 714.95,
-  "spy_current_spot": 714.72,
+  "spy_current_spot": 714.65,
   "config": {
     "initial_capital": 10000.0,
     "max_open_positions": 6,
@@ -29,19 +29,19 @@
       "JPM"
     ]
   },
-  "total_equity": 9966.68,
-  "total_return_dollars": -33.32,
-  "total_return_pct": -0.33,
-  "spy_return_pct": -0.03,
-  "cash_available": 6966.68,
+  "total_equity": 9964.68,
+  "total_return_dollars": -35.32,
+  "total_return_pct": -0.35,
+  "spy_return_pct": -0.04,
+  "cash_available": 6964.68,
   "collateral_locked": 3000.0,
   "utilization_pct": 30.1,
   "realized_pnl_cum": 0.0,
-  "unrealized_pnl": -33.32,
+  "unrealized_pnl": -35.32,
   "win_count": 0,
   "loss_count": 0,
   "win_rate_pct": 0.0,
-  "max_drawdown_pct": 0.33,
+  "max_drawdown_pct": 0.35,
   "open_positions": [
     {
       "pos_id": "SIM-11250323-QQQ-565",
@@ -66,7 +66,7 @@
           "option_type": "PUT",
           "strike": 565.0,
           "entry_mid": 8.62,
-          "current_mark": 8.22,
+          "current_mark": 8.09,
           "iv_at_entry": 0.4155,
           "moomoo_code": "US.QQQ261231P00565000"
         },
@@ -75,13 +75,13 @@
           "option_type": "PUT",
           "strike": 560.0,
           "entry_mid": 7.82,
-          "current_mark": 7.33,
+          "current_mark": 7.17,
           "iv_at_entry": 0.42,
           "moomoo_code": "US.QQQ261231P00560000"
         }
       ],
       "spot_at_entry": 633.81,
-      "current_spot": 633.63,
+      "current_spot": 633.64,
       "breakeven_price": 564.21,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -91,10 +91,10 @@
       "entry_net_credit_dollars": 76.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 421.36,
-      "current_close_debit_dollars": 89.0,
+      "current_close_debit_dollars": 92.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": -13.72,
-      "pnl_pct_of_credit": -17.9
+      "net_pnl_dollars": -16.72,
+      "pnl_pct_of_credit": -21.8
     },
     {
       "pos_id": "SIM-11250323-AMZN-225",
@@ -134,7 +134,7 @@
         }
       ],
       "spot_at_entry": 252.08,
-      "current_spot": 251.23,
+      "current_spot": 251.35,
       "breakeven_price": 224.13,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -187,7 +187,7 @@
         }
       ],
       "spot_at_entry": 326.8,
-      "current_spot": 326.43,
+      "current_spot": 326.54,
       "breakeven_price": 294.4,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -240,7 +240,7 @@
         }
       ],
       "spot_at_entry": 351.71,
-      "current_spot": 351.39,
+      "current_spot": 351.29,
       "breakeven_price": 324.33,
       "safety_score_at_entry": 81,
       "safety_grade_at_entry": "A",
@@ -278,7 +278,7 @@
           "option_type": "PUT",
           "strike": 243.0,
           "entry_mid": 2.88,
-          "current_mark": 2.59,
+          "current_mark": 2.55,
           "iv_at_entry": 0.3224,
           "moomoo_code": "US.IWM261231P00243000"
         },
@@ -287,13 +287,13 @@
           "option_type": "PUT",
           "strike": 238.0,
           "entry_mid": 2.27,
-          "current_mark": 2.05,
+          "current_mark": 1.97,
           "iv_at_entry": 0.3389,
           "moomoo_code": "US.IWM261231P00238000"
         }
       ],
       "spot_at_entry": 265.48,
-      "current_spot": 266.17,
+      "current_spot": 266.19,
       "breakeven_price": 242.4,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -303,10 +303,10 @@
       "entry_net_credit_dollars": 57.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 440.36,
-      "current_close_debit_dollars": 54.0,
+      "current_close_debit_dollars": 58.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 2.28,
-      "pnl_pct_of_credit": 4.0
+      "net_pnl_dollars": -1.72,
+      "pnl_pct_of_credit": -3.0
     },
     {
       "pos_id": "SIM-11250323-MSFT-445",
@@ -331,7 +331,7 @@
           "option_type": "PUT",
           "strike": 445.0,
           "entry_mid": 5.17,
-          "current_mark": 5.6,
+          "current_mark": 5.48,
           "iv_at_entry": 0.4066,
           "moomoo_code": "US.MSFT261224P00445000"
         },
@@ -340,13 +340,13 @@
           "option_type": "PUT",
           "strike": 440.0,
           "entry_mid": 4.47,
-          "current_mark": 4.77,
+          "current_mark": 4.7,
           "iv_at_entry": 0.4134,
           "moomoo_code": "US.MSFT261224P00440000"
         }
       ],
       "spot_at_entry": 495.55,
-      "current_spot": 497.19,
+      "current_spot": 497.17,
       "breakeven_price": 444.31,
       "safety_score_at_entry": 79,
       "safety_grade_at_entry": "A",
@@ -356,10 +356,10 @@
       "entry_net_credit_dollars": 66.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 431.36,
-      "current_close_debit_dollars": 83.0,
+      "current_close_debit_dollars": 78.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": -17.72,
-      "pnl_pct_of_credit": -26.6
+      "net_pnl_dollars": -12.72,
+      "pnl_pct_of_credit": -19.1
     }
   ],
   "closed_positions": [],
@@ -411,14 +411,26 @@
       "spy_benchmark_equity": 9996.78,
       "drawdown_pct": 0.33,
       "open_positions_count": 6
+    },
+    {
+      "timestamp": "2026-11-24 12:04:19",
+      "date": "2026-11-24",
+      "total_equity": 9964.68,
+      "cash_available": 6964.68,
+      "collateral_locked": 3000.0,
+      "realized_pnl_cum": 0.0,
+      "unrealized_pnl": -35.32,
+      "spy_benchmark_equity": 9995.8,
+      "drawdown_pct": 0.35,
+      "open_positions_count": 6
     }
   ],
   "activity_log": [
     {
-      "timestamp": "2026-11-24 12:03:14",
+      "timestamp": "2026-11-24 12:04:19",
       "event_type": "MARK",
       "symbol": "PORTFOLIO",
-      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $-33.32，总净值 $9,966.68",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $-35.32，总净值 $9,964.68",
       "pnl_dollars": null
     },
     {
