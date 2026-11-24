@@ -597,8 +597,14 @@ def run_auto_sim_cycle(
     current_dd_pct = round(((peak_eq - total_equity) / max(peak_eq, 1.0)) * 100.0, 2)
     max_dd = round(max([state.max_drawdown_pct, current_dd_pct]), 2)
 
+    cur_dt = now_et()
+    is_post_close_mark = is_closing_only or (
+        force_when_closed and cur_dt.weekday() < 5 and (cur_dt.hour * 60 + cur_dt.minute) > (15 * 60 + 58)
+    )
+    effective_ts = f"{today_s} 16:00:00" if is_post_close_mark else now_s
+
     eq_point = SimEquityPoint(
-        timestamp=now_s,
+        timestamp=effective_ts,
         date=today_s,
         total_equity=total_equity,
         cash_available=cash_available,
@@ -613,23 +619,31 @@ def run_auto_sim_cycle(
     state.equity_curve = _compact_equity_curve(state.equity_curve, eq_point)
 
     if not cycle_events:
-        # Keep activity log concise: replace consecutive MARK events on the same day or append if first mark
+        mark_label = (
+            "美股当日收盘盘口结算 (16:00 ET Close)"
+            if is_post_close_mark
+            else "盘中 30 分钟实时盘口盯市"
+        )
         mark_ev = SimActivityEvent(
-            timestamp=now_s,
+            timestamp=effective_ts,
             event_type="MARK",
             symbol="PORTFOLIO",
-            summary=f"盘中 30 分钟实时盘口盯市：在途 {len(state.open_positions)} 笔，浮动盈亏 ${unrealized_pnl:+.2f}，总净值 ${total_equity:,.2f}",
+            summary=f"{mark_label}：在途 {len(state.open_positions)} 笔，浮动盈亏 ${unrealized_pnl:+.2f}，总净值 ${total_equity:,.2f}",
         )
-        if state.activity_log and state.activity_log[0].event_type == "MARK":
+        if (
+            state.activity_log
+            and state.activity_log[0].event_type == "MARK"
+            and state.activity_log[0].timestamp[:16] == effective_ts[:16]
+        ):
             state.activity_log[0] = mark_ev
         else:
-            state.activity_log.insert(0, mark_ev)
+            state.activity_log = ([mark_ev] + state.activity_log)[:120]
     else:
-        state.activity_log = (cycle_events + state.activity_log)[:80]
+        state.activity_log = (cycle_events + state.activity_log)[:120]
 
     started_dt = datetime.strptime(state.started_at[:10], "%Y-%m-%d").date()
     state.days_running = max(1, (_today_et() - started_dt).days + 1)
-    state.last_updated_at = now_s
+    state.last_updated_at = effective_ts
     state.total_runs += 1
     state.total_equity = total_equity
     state.total_return_dollars = round(total_equity - cfg.initial_capital, 2)

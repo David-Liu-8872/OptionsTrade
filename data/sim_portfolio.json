@@ -1,8 +1,8 @@
 {
   "started_at": "2026-11-24 11:23:37",
-  "last_updated_at": "2026-11-24 17:22:58",
+  "last_updated_at": "2026-11-24 16:00:00",
   "days_running": 1,
-  "total_runs": 7,
+  "total_runs": 6,
   "spy_entry_spot": 714.95,
   "spy_current_spot": 718.78,
   "config": {
@@ -413,18 +413,6 @@
       "open_positions_count": 6
     },
     {
-      "timestamp": "2026-11-24 12:04:19",
-      "date": "2026-11-24",
-      "total_equity": 9964.68,
-      "cash_available": 6964.68,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": -35.32,
-      "spy_benchmark_equity": 9995.8,
-      "drawdown_pct": 0.35,
-      "open_positions_count": 6
-    },
-    {
       "timestamp": "2026-11-24 12:13:51",
       "date": "2026-11-24",
       "total_equity": 10000.68,
@@ -449,7 +437,7 @@
       "open_positions_count": 6
     },
     {
-      "timestamp": "2026-11-24 17:22:58",
+      "timestamp": "2026-11-24 16:00:00",
       "date": "2026-11-24",
       "total_equity": 10035.68,
       "cash_available": 7035.68,
@@ -463,59 +451,87 @@
   ],
   "activity_log": [
     {
-      "timestamp": "2026-11-24 17:22:58",
+      "timestamp": "2026-11-24 16:00:00",
       "event_type": "MARK",
       "symbol": "PORTFOLIO",
-      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $+35.68，总净值 $10,035.68",
+      "summary": "美股当日收盘盘口结算 (16:00 ET Close)：在途 6 笔，浮动盈亏 $+35.68，总净值 $10,035.68",
+      "pnl_dollars": null
+    },
+    {
+      "timestamp": "2026-11-24 12:25:53",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $+23.68，总净值 $10,023.68",
+      "pnl_dollars": null
+    },
+    {
+      "timestamp": "2026-11-24 12:13:51",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $+0.68，总净值 $10,000.68",
+      "pnl_dollars": null
+    },
+    {
+      "timestamp": "2026-11-24 12:03:14",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $-33.32，总净值 $9,966.68",
+      "pnl_dollars": null
+    },
+    {
+      "timestamp": "2026-11-24 11:43:24",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $-10.32，总净值 $9,989.68",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "QQQ",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 36DTE) · 行权 $565/$560P · 安全评级 A(82分, POP 80.5%) · 净收权利金 +$76.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 37DTE) · 行权 $565/$560P · 安全评级 A(82分, POP 80.5%) · 净收权利金 +$76.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "AMZN",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 29DTE) · 行权 $225/$220P · 安全评级 A(80分, POP 81.1%) · 净收权利金 +$84.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 30DTE) · 行权 $225/$220P · 安全评级 A(80分, POP 81.1%) · 净收权利金 +$84.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "GLD",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 36DTE) · 行权 $295/$290P · 安全评级 A(82分, POP 83.6%) · 净收权利金 +$57.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 37DTE) · 行权 $295/$290P · 安全评级 A(82分, POP 83.6%) · 净收权利金 +$57.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "AAPL",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 29DTE) · 行权 $325/$320P · 安全评级 A(81分, POP 82.7%) · 净收权利金 +$64.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 30DTE) · 行权 $325/$320P · 安全评级 A(81分, POP 82.7%) · 净收权利金 +$64.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "IWM",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 36DTE) · 行权 $243/$238P · 安全评级 A(80分, POP 81.3%) · 净收权利金 +$57.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-31, 37DTE) · 行权 $243/$238P · 安全评级 A(80分, POP 81.3%) · 净收权利金 +$57.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "OPEN",
       "symbol": "MSFT",
-      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 29DTE) · 行权 $445/$440P · 安全评级 A(79分, POP 82.2%) · 净收权利金 +$66.64 (担保 $500)",
+      "summary": "自动建仓 牛市看跌价差 (Bull Put Spread) (2026-12-24, 30DTE) · 行权 $445/$440P · 安全评级 A(79分, POP 82.2%) · 净收权利金 +$66.64 (担保 $500)",
       "pnl_dollars": null
     },
     {
       "timestamp": "2026-11-24 11:23:37",
       "event_type": "INIT",
       "symbol": "PORTFOLIO",
-      "summary": "初始化 30 天全自动模拟账户，起始本金 $10,000，基准 SPY 入场价 $714.95",
+      "summary": "初始化 30 天全自动模拟账户 (美东时间 ET)，起始本金 $10,000，基准 SPY 入场价 $714.95",
       "pnl_dollars": null
     }
   ]
