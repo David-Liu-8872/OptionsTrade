@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 import json
 import math
 import os
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import requests
 import yfinance as yf
@@ -23,16 +24,79 @@ from app.quant.bs_pricing import bs_price_and_greeks, estimate_moomoo_us_option_
 from app.quant.strategies import build_candidates_for_ticker
 
 
+US_EASTERN = ZoneInfo("America/New_York")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SIM_STATE_PATH = REPO_ROOT / "data" / "sim_portfolio.json"
 
 
+def now_et() -> datetime:
+    return datetime.now(US_EASTERN)
+
+
 def _now_str() -> str:
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return now_et().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _today_et() -> date:
+    return now_et().date()
 
 
 def _today_str() -> str:
-    return datetime.now().strftime("%Y-%m-%d")
+    return _today_et().strftime("%Y-%m-%d")
+
+
+def is_us_options_market_open(dt_et: datetime | None = None) -> tuple[bool, str]:
+    """
+    Strict US Options regular trading hours gate (America/New_York):
+      - Monday–Friday only
+      - Handles Thanksgiving (4th Thu of Nov), Black Friday 13:00 ET early close, Christmas Eve 13:00 ET, Christmas, New Year
+      - Regular window: 09:35 ET to 15:58 ET (skips first 5 mins of opening auction wide spreads)
+    """
+    cur = dt_et or now_et()
+    d = cur.date()
+
+    if cur.weekday() >= 5:
+        return False, f"周末休市 (美东 {cur.strftime('%Y-%m-%d %A')})"
+
+    # Fixed / calendar NYSE holidays check
+    if (d.month, d.day) in {(1, 1), (6, 19), (7, 4), (12, 25)}:
+        return False, f"美股节假日休市 ({d.isoformat()})"
+
+    # Thanksgiving: 4th Thursday of November
+    if d.month == 11 and d.weekday() == 3 and 22 <= d.day <= 28:
+        return False, f"美股感恩节休市 ({d.isoformat()})"
+
+    minutes = cur.hour * 60 + cur.minute
+    open_min = 9 * 60 + 35  # 09:35 ET
+
+    # Early close days (13:00 ET): Day after Thanksgiving & Dec 24
+    is_black_friday = d.month == 11 and d.weekday() == 4 and 23 <= d.day <= 29
+    is_christmas_eve = (d.month, d.day) == (12, 24)
+    close_min = (12 * 60 + 55) if (is_black_friday or is_christmas_eve) else (15 * 60 + 58)
+
+    if not (open_min <= minutes <= close_min):
+        return (
+            False,
+            f"当前非美股盘中交易时段 (美东 {cur.strftime('%H:%M')}，仅在 09:35–{close_min // 60:02d}:{close_min % 60:02d} ET 执行)",
+        )
+
+    return True, f"美股盘中正常交易时段 (美东 {cur.strftime('%Y-%m-%d %H:%M')} ET)"
+
+
+def _verify_live_quotes_healthy() -> bool:
+    """Verify SPY option chain actually has non-zero live Bid/Ask quotes (catches unscheduled halts/holidays)."""
+    try:
+        tk = yf.Ticker("SPY")
+        exps = tk.options
+        if not exps:
+            return False
+        puts = tk.option_chain(exps[0]).puts
+        if puts is None or puts.empty:
+            return False
+        live_bids = puts[puts["bid"] > 0.05]
+        return len(live_bids) >= 5
+    except Exception:
+        return False
 
 
 def _get_spy_spot() -> float:
@@ -93,7 +157,7 @@ def load_or_init_sim_state(state_path: Path = SIM_STATE_PATH) -> SimPortfolioSta
                 timestamp=now_s,
                 event_type="INIT",
                 symbol="PORTFOLIO",
-                summary=f"初始化 30 天全自动模拟账户，起始本金 ${cfg.initial_capital:,.0f}，基准 SPY 入场价 ${spy_spot:.2f}",
+                summary=f"初始化 30 天全自动模拟账户 (美东时间 ET)，起始本金 ${cfg.initial_capital:,.0f}，基准 SPY 入场价 ${spy_spot:.2f}",
             )
         ],
     )
@@ -110,9 +174,7 @@ def save_sim_state(state: SimPortfolioState, state_path: Path = SIM_STATE_PATH) 
 
 
 def _fetch_live_chain_lookup(symbol: str, expiration: str) -> dict[tuple[str, float], tuple[float, float, float]]:
-    """
-    Return {(option_type, strike): (bid, ask, lastPrice)} from live yfinance option chain.
-    """
+    """Return {(option_type, strike): (bid, ask, lastPrice)} from live yfinance option chain."""
     lookup: dict[tuple[str, float], tuple[float, float, float]] = {}
     try:
         tk = yf.Ticker(symbol)
@@ -144,9 +206,9 @@ def _mark_position_to_market(
     spot_price: float,
     chain_lookup: dict[tuple[str, float], tuple[float, float, float]],
 ) -> SimPosition:
-    today = datetime.now().date()
+    today_et = _today_et()
     exp_date = datetime.strptime(pos.expiration, "%Y-%m-%d").date()
-    current_dte = max(0, (exp_date - today).days)
+    current_dte = max(0, (exp_date - today_et).days)
     t_years = max(current_dte / 365.0, 1e-6)
 
     updated_legs: list[SimPositionLeg] = []
@@ -155,7 +217,6 @@ def _mark_position_to_market(
     for leg in pos.legs:
         key = (leg.option_type, round(leg.strike, 2))
         if current_dte == 0:
-            # Exact intrinsic value at expiration
             mark = (
                 max(0.0, spot_price - leg.strike)
                 if leg.option_type == "CALL"
@@ -165,7 +226,6 @@ def _mark_position_to_market(
             bid, ask, last_p = chain_lookup[key]
             if bid > 0 and ask >= bid:
                 mid = 0.5 * (bid + ask)
-                # Conservative fill penalty: pay slightly above mid to buy back short, receive slightly below mid to sell long
                 slip = min(0.05, 0.15 * (ask - bid))
                 mark = (mid + slip) if leg.action == "SELL" else max(0.01, mid - slip)
             elif last_p > 0:
@@ -185,7 +245,6 @@ def _mark_position_to_market(
         else:
             close_debit_per_share -= mark
 
-    # Account for Covered Call underlying 100 shares movement
     stock_pnl_dollars = 0.0
     if pos.strategy == "covered_call":
         stock_pnl_dollars = (spot_price - pos.spot_at_entry) * 100.0 * pos.contracts
@@ -200,7 +259,6 @@ def _mark_position_to_market(
         pos.entry_net_credit_dollars - close_debit_dollars - exit_fee + stock_pnl_dollars,
         2,
     )
-    # Clamp within theoretical max loss / max profit bounds
     net_pnl = max(-pos.max_loss_dollars, net_pnl)
     pnl_pct = round((net_pnl / max(pos.entry_net_credit_dollars, 1.0)) * 100.0, 1)
 
@@ -229,25 +287,76 @@ def _check_exit_signal(pos: SimPosition, cfg: SimConfig) -> tuple[str | None, st
     return None, None
 
 
+def _compact_equity_curve(curve: list[SimEquityPoint], new_pt: SimEquityPoint) -> list[SimEquityPoint]:
+    """
+    Keep:
+      - Point 0 (Initial $10,000 baseline)
+      - For past dates (< new_pt.date): keep only the final closing snapshot of each date
+      - For today (== new_pt.date): keep intraday 30-min snapshots (deduping identical timestamps)
+    """
+    if not curve:
+        return [new_pt]
+
+    baseline = curve[0]
+    past_by_date: dict[str, SimEquityPoint] = {}
+    today_pts: list[SimEquityPoint] = []
+
+    for pt in curve[1:]:
+        if pt.date < new_pt.date:
+            past_by_date[pt.date] = pt
+        elif pt.date == new_pt.date:
+            if pt.timestamp[:16] != new_pt.timestamp[:16]:
+                today_pts.append(pt)
+
+    today_pts.append(new_pt)
+    if len(today_pts) > 15:
+        today_pts = today_pts[-15:]
+
+    past_sorted = [past_by_date[d] for d in sorted(past_by_date.keys())]
+    return [baseline] + past_sorted + today_pts
+
+
 def _send_notifications_if_configured(state: SimPortfolioState, new_events: list[SimActivityEvent]) -> None:
     webhook_url = os.environ.get("SIM_WEBHOOK_URL", "").strip()
+    bark_url = os.environ.get("BARK_URL", "").strip()
     tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 
-    if not webhook_url and not (tg_token and tg_chat):
+    if not webhook_url and not bark_url and not (tg_token and tg_chat):
         return
 
-    event_lines = "\n".join(f"• [{e.event_type}] {e.symbol}: {e.summary}" for e in new_events[:8])
+    trade_events = [e for e in new_events if e.event_type in ("OPEN", "CLOSE")]
+    only_trades = os.environ.get("NOTIFY_ONLY_TRADES", "false").lower() == "true"
+    if only_trades and not trade_events:
+        return
+
+    title = f"期权模拟净值 ${state.total_equity:,.2f} ({state.total_return_pct:+.2f}%)"
+    event_lines = "\n".join(f"• [{e.event_type}] {e.symbol}: {e.summary}" for e in new_events[:6])
     text = (
-        f"📊 Moomoo 美股稳健期权自动模拟日报 ({state.last_updated_at})\n"
-        f"账户总净值: ${state.total_equity:,.2f} ({state.total_return_pct:+.2f}% | 同期 SPY {state.spy_return_pct:+.2f}%)\n"
-        f"在途持仓: {len(state.open_positions)} 笔 | 胜率: {state.win_rate_pct:.1f}% ({state.win_count}胜/{state.loss_count}负)\n"
-        f"本次变动:\n{event_lines or '• 常规盯市巡检，无新开/平仓动作'}"
+        f"📊 Moomoo 美股期权自动模拟 ({state.last_updated_at} ET)\n"
+        f"账户净值: ${state.total_equity:,.2f} ({state.total_return_pct:+.2f}% | 同期 SPY {state.spy_return_pct:+.2f}%)\n"
+        f"在途: {len(state.open_positions)} 笔 | 胜率: {state.win_rate_pct:.1f}% ({state.win_count}胜/{state.loss_count}负)\n"
+        f"动态:\n{event_lines or '• 盘中 30 分钟常规盯市完成'}"
     )
+
+    if bark_url:
+        try:
+            endpoint = bark_url.rstrip("/")
+            requests.post(
+                endpoint,
+                json={
+                    "title": title,
+                    "body": text,
+                    "group": "OptionsTrade",
+                    "url": "https://david-liu-8872.github.io/OptionsTrade/",
+                },
+                timeout=6,
+            )
+        except Exception:
+            pass
 
     if webhook_url:
         try:
-            # Compatible with Feishu, DingTalk, Slack, Discord
             payload: dict[str, Any] = {"text": text, "content": text, "msg_type": "text"}
             if "feishu" in webhook_url or "larksuite" in webhook_url:
                 payload = {"msg_type": "text", "content": {"text": text}}
@@ -269,22 +378,28 @@ def _send_notifications_if_configured(state: SimPortfolioState, new_events: list
 def run_auto_sim_cycle(
     *,
     allow_new_entries: bool = True,
+    force_when_closed: bool = False,
     state_path: Path = SIM_STATE_PATH,
-) -> SimPortfolioState:
+) -> tuple[SimPortfolioState, bool, str]:
     """
-    Execute one complete autonomous paper-trading cycle:
-      1. Mark all open positions against live US option chain Bid/Ask quotes.
-      2. Auto-close positions hitting 50% TP, 21 DTE, Stop-Loss, or Expiration.
-      3. Scan curated watchlist & open new top-graded (A+/A/B+) non-overlapping trades within risk limits.
-      4. Update equity curve, drawdown, SPY benchmark, and persist to JSON.
+    Execute one autonomous paper-trading cycle in US Eastern Time.
+    Returns (state, executed, status_message).
     """
     state = load_or_init_sim_state(state_path)
+
+    if not force_when_closed:
+        is_open, msg = is_us_options_market_open()
+        if not is_open:
+            return state, False, msg
+        if not _verify_live_quotes_healthy():
+            return state, False, "检测到美股期权盘口未激活（买一价为 0 / 节假日休市），自动跳过本轮"
+
     cfg = state.config
     now_s = _now_str()
     today_s = _today_str()
     cycle_events: list[SimActivityEvent] = []
 
-    # 1. Fetch live spot & chains for currently open positions
+    # 1. Mark all open positions against live US option chain Bid/Ask
     still_open: list[SimPosition] = []
     chain_cache: dict[tuple[str, str], dict[tuple[str, float], tuple[float, float, float]]] = {}
     spot_cache: dict[str, float] = {}
@@ -316,20 +431,21 @@ def run_auto_sim_cycle(
             else:
                 state.loss_count += 1
 
-            ev = SimActivityEvent(
-                timestamp=now_s,
-                event_type="CLOSE",
-                symbol=closed_pos.symbol,
-                summary=f"自动平仓 {closed_pos.strategy_label} (${closed_pos.short_strike:g}{f'/${closed_pos.long_strike:g}' if closed_pos.long_strike else ''}) · {reason_label} · 净盈亏 ${closed_pos.net_pnl_dollars:+.2f}",
-                pnl_dollars=closed_pos.net_pnl_dollars,
+            cycle_events.append(
+                SimActivityEvent(
+                    timestamp=now_s,
+                    event_type="CLOSE",
+                    symbol=closed_pos.symbol,
+                    summary=f"自动平仓 {closed_pos.strategy_label} (${closed_pos.short_strike:g}{f'/${closed_pos.long_strike:g}' if closed_pos.long_strike else ''}) · {reason_label} · 净盈亏 ${closed_pos.net_pnl_dollars:+.2f}",
+                    pnl_dollars=closed_pos.net_pnl_dollars,
+                )
             )
-            cycle_events.append(ev)
         else:
             still_open.append(marked)
 
     state.open_positions = still_open
 
-    # 2. Scan & auto-open new positions if slots & buying power permit
+    # 2. Scan & open new non-overlapping top candidates
     open_symbols = {p.symbol for p in state.open_positions}
     current_collateral = sum(p.collateral_required for p in state.open_positions)
     prelim_equity = cfg.initial_capital + state.realized_pnl_cum + sum(p.net_pnl_dollars for p in state.open_positions)
@@ -354,7 +470,6 @@ def run_auto_sim_cycle(
                 exclude_earnings=True,
                 only_uptrend=False,
             )
-            # Filter strictly for Bull Put Spread & Cash-Secured Put with high safety score
             for c in cands:
                 if c.strategy in ("bull_put_spread", "cash_secured_put") and c.safety.score_total >= cfg.min_safety_score:
                     all_cands.append(c)
@@ -372,7 +487,6 @@ def run_auto_sim_cycle(
             if current_collateral + cand.collateral_required > max_allowed_collateral:
                 continue
 
-            # Apply conservative $0.02/share entry slippage penalty so simulation never cheats
             slip_dollars = 2.0
             realistic_gross = max(10.0, round(cand.gross_credit_dollars - slip_dollars, 2))
             realistic_net_credit = round(realistic_gross - cand.moomoo_fee_dollars, 2)
@@ -393,7 +507,7 @@ def run_auto_sim_cycle(
             ]
             exit_fee_est = estimate_moomoo_us_option_fee(len(sim_legs), 1)
             new_pos = SimPosition(
-                pos_id=f"SIM-{datetime.now().strftime('%m%d%H%M')}-{cand.symbol}-{int(cand.short_strike)}",
+                pos_id=f"SIM-{now_et().strftime('%m%d%H%M')}-{cand.symbol}-{int(cand.short_strike)}",
                 status="OPEN",
                 opened_at=now_s,
                 symbol=cand.symbol,
@@ -455,7 +569,6 @@ def run_auto_sim_cycle(
     total_closed = state.win_count + state.loss_count
     win_rate = round((state.win_count / total_closed) * 100.0, 1) if total_closed > 0 else 0.0
 
-    # Peak equity & drawdown calculation
     prev_peaks = [pt.total_equity for pt in state.equity_curve] + [cfg.initial_capital, total_equity]
     peak_eq = max(prev_peaks)
     current_dd_pct = round(((peak_eq - total_equity) / max(peak_eq, 1.0)) * 100.0, 2)
@@ -474,25 +587,25 @@ def run_auto_sim_cycle(
         open_positions_count=len(state.open_positions),
     )
 
-    # Keep 1 latest snapshot per date (or append if first run vs new date, keeping initial baseline point)
-    if len(state.equity_curve) >= 2 and state.equity_curve[-1].date == today_s:
-        state.equity_curve[-1] = eq_point
-    else:
-        state.equity_curve.append(eq_point)
+    state.equity_curve = _compact_equity_curve(state.equity_curve, eq_point)
 
     if not cycle_events:
-        cycle_events.append(
-            SimActivityEvent(
-                timestamp=now_s,
-                event_type="MARK",
-                symbol="PORTFOLIO",
-                summary=f"盘中自动盯市完成：在途 {len(state.open_positions)} 笔，浮动盈亏 ${unrealized_pnl:+.2f}，总净值 ${total_equity:,.2f}",
-            )
+        # Keep activity log concise: replace consecutive MARK events on the same day or append if first mark
+        mark_ev = SimActivityEvent(
+            timestamp=now_s,
+            event_type="MARK",
+            symbol="PORTFOLIO",
+            summary=f"盘中 30 分钟实时盘口盯市：在途 {len(state.open_positions)} 笔，浮动盈亏 ${unrealized_pnl:+.2f}，总净值 ${total_equity:,.2f}",
         )
+        if state.activity_log and state.activity_log[0].event_type == "MARK":
+            state.activity_log[0] = mark_ev
+        else:
+            state.activity_log.insert(0, mark_ev)
+    else:
+        state.activity_log = (cycle_events + state.activity_log)[:80]
 
-    state.activity_log = (cycle_events + state.activity_log)[:80]
     started_dt = datetime.strptime(state.started_at[:10], "%Y-%m-%d").date()
-    state.days_running = max(1, (datetime.now().date() - started_dt).days + 1)
+    state.days_running = max(1, (_today_et() - started_dt).days + 1)
     state.last_updated_at = now_s
     state.total_runs += 1
     state.total_equity = total_equity
@@ -508,7 +621,7 @@ def run_auto_sim_cycle(
 
     save_sim_state(state, state_path)
     _send_notifications_if_configured(state, cycle_events)
-    return state
+    return state, True, "OK"
 
 
 def reset_sim_portfolio(state_path: Path = SIM_STATE_PATH) -> SimPortfolioState:

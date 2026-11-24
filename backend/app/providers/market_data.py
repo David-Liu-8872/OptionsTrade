@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import math
 import time
 from typing import Any
@@ -62,7 +63,7 @@ def _build_synthetic_fallback(symbol: str, min_dte: int, max_dte: int) -> dict[s
     iv_map = {"NVDA": 0.44, "META": 0.31, "SPY": 0.155, "QQQ": 0.195, "IWM": 0.22, "KO": 0.145, "SCHD": 0.135, "TLT": 0.165}
     base_iv = iv_map.get(symbol, 0.24)
 
-    today = datetime.now().date()
+    today = datetime.now(ZoneInfo("America/New_York")).date()
     dtes = [d for d in (28, 35, 42) if min_dte <= d <= max_dte] or [max(min_dte, 30)]
     step = 5.0 if spot >= 180 else (2.5 if spot >= 65 else 1.0)
 
@@ -173,7 +174,7 @@ def fetch_ticker_snapshot(
         # Check upcoming earnings date for individual stocks (ETFs have none)
         earnings_date_str: str | None = None
         days_to_earnings: int | None = None
-        today = datetime.now().date()
+        today = datetime.now(ZoneInfo("America/New_York")).date()
         name, sector = TICKER_META.get(clean_sym, (clean_sym, "美股期权标的"))
         if "ETF" not in sector:
             try:

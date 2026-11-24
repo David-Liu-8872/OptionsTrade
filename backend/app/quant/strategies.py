@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 import math
 
 from app.models import (
@@ -232,7 +233,7 @@ def build_candidates_for_ticker(
 
     iv_hv_ratio = round(atm_iv / max(hv_20, 5.0), 2)
     delta_lo, delta_hi = RISK_DELTA_RANGES[risk_level]
-    today = datetime.now().date()
+    today = datetime.now(ZoneInfo("America/New_York")).date()
 
     results: list[StrategyCandidate] = []
 

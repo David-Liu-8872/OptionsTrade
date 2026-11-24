@@ -2,11 +2,16 @@ name: US Options 30-Day Auto Paper Trader
 
 on:
   schedule:
-    # 美股交易日 (周一至周五) 盘中自动巡检两次 (兼顾冬令时 EST 与夏令时 EDT，均处于美股期权实盘开盘时段):
-    # 1) 15:30 UTC = 美东 10:30 EST / 11:30 EDT (早盘盘口稳定后巡检 & 自动建仓)
-    - cron: '30 15 * * 1-5'
-    # 2) 19:45 UTC = 美东 14:45 EST / 15:45 EDT (尾盘收盘前盯市 & 50%止盈/21DTE平仓结算)
-    - cron: '45 19 * * 1-5'
+    # 美股交易日 (周一至周五) 开盘时段每 30 分钟自动巡查一次 (覆盖冬令时 EST 与夏令时 EDT):
+    # 代码内置 America/New_York 开盘时段门禁 (09:35-15:58 ET) 与节假日/盘口健康度校验，非开盘窗口秒级自动跳过
+    - cron: '10,40 13-20 * * 1-5'
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/auto_paper_trade.yml'
   workflow_dispatch:
     inputs:
       mark_only:
@@ -47,19 +52,34 @@ jobs:
         working-directory: backend
         run: uv sync --frozen || uv sync
 
-      - name: Run Autonomous US Options Paper-Trading Cycle
+      - name: Run Autonomous US Options Paper-Trading Cycle (US Eastern Gate)
         env:
           SIM_WEBHOOK_URL: ${{ secrets.SIM_WEBHOOK_URL }}
+          BARK_URL: ${{ secrets.BARK_URL }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTIFY_ONLY_TRADES: ${{ secrets.NOTIFY_ONLY_TRADES }}
         run: |
           EXTRA_ARGS="--export-static"
-          if [ "${{ github.event.inputs.mark_only }}" = "true" ]; then
+          if [ "${{ github.event_name }}" = "push" ]; then
+            EXTRA_ARGS="$EXTRA_ARGS --mark-only"
+          elif [ "${{ github.event.inputs.mark_only }}" = "true" ]; then
             EXTRA_ARGS="$EXTRA_ARGS --mark-only"
           fi
           uv run --directory backend python scripts/run_auto_sim.py $EXTRA_ARGS
 
+      - name: Check if portfolio changed (skip Pages rebuild on closed-market cron ticks)
+        id: check_changes
+        run: |
+          if git diff --quiet data/sim_portfolio.json && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "Market closed / no portfolio changes on scheduled tick; skipping commit & Pages rebuild."
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Commit updated 30-day portfolio state back to repo
+        if: steps.check_changes.outputs.should_publish == 'true'
         run: |
           git config user.name "options-sim-bot[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -73,6 +93,7 @@ jobs:
           fi
 
       - name: Setup Node.js for Static Dashboard Build
+        if: steps.check_changes.outputs.should_publish == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -80,18 +101,20 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Build Static Visual Dashboard (with latest sim & scan JSON)
+        if: steps.check_changes.outputs.should_publish == 'true'
         working-directory: frontend
         run: |
           npm ci
           npm run build
-          # Default GitHub Pages entry view opens smoothly with relative assets
 
       - name: Upload GitHub Pages artifact
+        if: steps.check_changes.outputs.should_publish == 'true'
         uses: actions/upload-pages-artifact@v3
         continue-on-error: true
         with:
           path: frontend/dist
 
-      - name: Deploy to GitHub Pages (if enabled in Repo Settings -> Pages)
+      - name: Deploy to GitHub Pages
+        if: steps.check_changes.outputs.should_publish == 'true'
         uses: actions/deploy-pages@v4
         continue-on-error: true

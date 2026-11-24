@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
-Autonomous US Options Low-Risk Paper Trading Runner.
-Designed for scheduled execution via GitHub Actions Cron during US market hours
-(e.g. 15:30 UTC & 20:15 UTC Mon-Fri) or manual CLI execution.
+Autonomous US Options Low-Risk Paper Trading Runner (US Eastern Time).
 """
 from __future__ import annotations
 
@@ -19,30 +17,34 @@ if str(BACKEND_DIR) not in sys.path:
 from app.main import run_screener  # noqa: E402
 from app.models import ScreenerRequest  # noqa: E402
 from app.providers.presets import PRESET_POOLS  # noqa: E402
-from app.sim.auto_trader import run_auto_sim_cycle  # noqa: E402
+from app.sim.auto_trader import load_or_init_sim_state, run_auto_sim_cycle  # noqa: E402
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run 1 cycle of Moomoo US Options Auto-Simulation")
-    parser.add_argument(
-        "--mark-only",
-        action="store_true",
-        help="Only mark open positions and process exits without opening new trades",
-    )
-    parser.add_argument(
-        "--export-static",
-        action="store_true",
-        help="Export static JSON snapshots into frontend/public/data for GitHub Pages hosting",
-    )
+    parser.add_argument("--mark-only", action="store_true", help="Only mark open positions without opening new ones")
+    parser.add_argument("--force", action="store_true", help="Force execution even outside US market hours")
+    parser.add_argument("--skip-sim", action="store_true", help="Skip trading cycle and only export static UI data")
+    parser.add_argument("--export-static", action="store_true", help="Export static JSON snapshots for GitHub Pages")
     args = parser.parse_args()
 
-    print("=== [1/2] Running Autonomous Paper-Trading Cycle ===")
-    state = run_auto_sim_cycle(allow_new_entries=not args.mark_only)
-    print(
-        f"Updated at: {state.last_updated_at} | Equity: ${state.total_equity:,.2f} "
-        f"({state.total_return_pct:+.2f}%) | Open: {len(state.open_positions)} | "
-        f"Closed: {len(state.closed_positions)} (WinRate {state.win_rate_pct:.1f}%)"
-    )
+    if args.skip_sim:
+        state = load_or_init_sim_state()
+        print("Skipped trading cycle (--skip-sim); loaded existing portfolio state.")
+    else:
+        print("=== [1/2] Checking US Market Hours & Running Paper-Trading Cycle ===")
+        state, executed, msg = run_auto_sim_cycle(
+            allow_new_entries=not args.mark_only,
+            force_when_closed=args.force,
+        )
+        if not executed:
+            print(f"⏭️ Skipped trading cycle: {msg}")
+        else:
+            print(
+                f"✅ Executed at {state.last_updated_at} ET | Equity: ${state.total_equity:,.2f} "
+                f"({state.total_return_pct:+.2f}%) | Open: {len(state.open_positions)} | "
+                f"Closed: {len(state.closed_positions)} (WinRate {state.win_rate_pct:.1f}%)"
+            )
 
     if args.export_static:
         print("=== [2/2] Exporting Static JSON Snapshots for GitHub Pages ===")

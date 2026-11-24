@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -113,7 +114,7 @@ def run_screener(req: ScreenerRequest) -> ScreenerResponse:
         active_source = "离线仿真行情"
 
     return ScreenerResponse(
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        generated_at=datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S ET"),
         active_source=active_source,
         moomoo_connected=moomoo_client.is_port_open(),
         scanned_symbols=[s["symbol"] for s in snapshots],
@@ -179,8 +180,9 @@ def get_sim_portfolio() -> SimPortfolioState:
 
 
 @app.post("/api/sim/run-cycle", response_model=SimPortfolioState)
-def trigger_sim_cycle(mark_only: bool = False) -> SimPortfolioState:
-    return run_auto_sim_cycle(allow_new_entries=not mark_only)
+def trigger_sim_cycle(mark_only: bool = False, force: bool = True) -> SimPortfolioState:
+    state, _, _ = run_auto_sim_cycle(allow_new_entries=not mark_only, force_when_closed=force)
+    return state
 
 
 @app.post("/api/sim/reset", response_model=SimPortfolioState)

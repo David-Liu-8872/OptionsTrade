@@ -120,10 +120,10 @@ export function AutoSimLabView({
             )}
           </div>
           <p className="text-xs text-slate-300">
-            每个美股交易日盘中（美东 10:30 & 15:15）自动拉取真实期权 Bid/Ask 盘口盯市：达{' '}
+            每个美股交易日开盘时段（美东 09:40–15:40 ET，<b>每 30 分钟自动巡查一次，共 13 次/日</b>）拉取真实期权 Bid/Ask 盘口盯市：达{' '}
             <b className="text-emerald-300">{simState.config.take_profit_pct}% 净利自动止盈</b>、剩{' '}
             <b className="text-sky-300">≤{simState.config.dte_exit_threshold} 天自动平仓</b>、亏损达{' '}
-            <b className="text-rose-300">{simState.config.stop_loss_mult}x 权利金自动止损</b>，并严格扣减双边 Moomoo 规费与滑点。
+            <b className="text-rose-300">{simState.config.stop_loss_mult}x 权利金自动止损</b>；非交易时段与美股节假日自动锁定不动仓。
           </p>
         </div>
 
@@ -251,7 +251,7 @@ export function AutoSimLabView({
               </h3>
             </div>
             <span className="text-xs text-slate-400 tabular-nums">
-              最近更新：{simState.last_updated_at}
+              最近更新 (美东 ET)：{simState.last_updated_at}
             </span>
           </div>
           <EChartBox option={equityChartOption} height="275px" />
