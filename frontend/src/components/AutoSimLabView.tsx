@@ -33,7 +33,9 @@ export function AutoSimLabView({
     if (!simState || simState.equity_curve.length === 0) return {};
     const pts = simState.equity_curve;
     const labels = pts.map((p, idx) =>
-      idx === 0 ? `${p.date.slice(5)} 起步` : p.timestamp.slice(5, 16)
+      idx === 0
+        ? `${p.date.slice(5)} 起步 (ET)`
+        : `${p.timestamp.slice(5, 16)} ET`
     );
     const eqValues = pts.map((p) => p.total_equity);
     const spyValues = pts.map((p) => p.spy_benchmark_equity);
