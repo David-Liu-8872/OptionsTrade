@@ -22,6 +22,67 @@ interface AutoSimLabViewProps {
   onReset: () => void;
 }
 
+const nyPartsFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+});
+
+const auPartsFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Australia/Sydney',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  timeZoneName: 'short',
+  hourCycle: 'h23',
+});
+
+/**
+ * Convert a wall-clock "YYYY-MM-DD HH:MM:SS" string in America/New_York
+ * into Australia/Sydney wall-clock strings (handles US & AU DST automatically).
+ */
+function formatEtToAustralia(etStr: string): {
+  shortAu: string; // e.g. "11-25 04:13"
+  fullAu: string; // e.g. "2026-11-25 04:13:51 AEDT"
+} {
+  const m = etStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) {
+    return { shortAu: etStr.slice(5, 16), fullAu: etStr };
+  }
+  const [, yr, mo, da, hr, mi, sc = '00'] = m;
+  const targetWallUtc = Date.UTC(+yr, +mo - 1, +da, +hr, +mi, +sc);
+
+  const getNyWallUtc = (epochMs: number) => {
+    const map: Record<string, string> = {};
+    for (const p of nyPartsFmt.formatToParts(new Date(epochMs))) {
+      if (p.type !== 'literal') map[p.type] = p.value;
+    }
+    return Date.UTC(+map.year, +map.month - 1, +map.day, +map.hour, +map.minute, +map.second);
+  };
+
+  // Refine UTC instant from NY wall-clock offset
+  let utcMs = targetWallUtc - (getNyWallUtc(targetWallUtc) - targetWallUtc);
+  utcMs -= getNyWallUtc(utcMs) - targetWallUtc;
+
+  const auMap: Record<string, string> = {};
+  for (const p of auPartsFmt.formatToParts(new Date(utcMs))) {
+    if (p.type !== 'literal') auMap[p.type] = p.value;
+  }
+  const tzLabel = auMap.timeZoneName || 'AET';
+  return {
+    shortAu: `${auMap.month}-${auMap.day} ${auMap.hour}:${auMap.minute}`,
+    fullAu: `${auMap.year}-${auMap.month}-${auMap.day} ${auMap.hour}:${auMap.minute}:${auMap.second} (${tzLabel})`,
+  };
+}
+
 export function AutoSimLabView({
   simState,
   isStaticMode,
@@ -32,17 +93,17 @@ export function AutoSimLabView({
   const equityChartOption = useMemo<echarts.EChartsCoreOption>(() => {
     if (!simState || simState.equity_curve.length === 0) return {};
     const pts = simState.equity_curve;
-    const labels = pts.map((p, idx) =>
-      idx === 0
-        ? `${p.date.slice(5)} 起步 (ET)`
-        : `${p.timestamp.slice(5, 16)} ET`
-    );
+    const auMeta = pts.map((p) => formatEtToAustralia(p.timestamp));
+    const labels = pts.map((p, idx) => {
+      const topEt = idx === 0 ? `${p.date.slice(5)} 起步 ET` : `${p.timestamp.slice(5, 16)} ET`;
+      return `{et|${topEt}}\n{au|澳 ${auMeta[idx].shortAu}}`;
+    });
     const eqValues = pts.map((p) => p.total_equity);
     const spyValues = pts.map((p) => p.spy_benchmark_equity);
 
     return {
       backgroundColor: 'transparent',
-      grid: { left: 62, right: 28, top: 42, bottom: 36 },
+      grid: { left: 62, right: 28, top: 42, bottom: 54 },
       legend: {
         top: 4,
         right: 10,
@@ -53,11 +114,45 @@ export function AutoSimLabView({
         backgroundColor: 'rgba(15, 23, 42, 0.96)',
         borderColor: '#334155',
         textStyle: { color: '#f1f5f9', fontSize: 12 },
+        formatter: (params: unknown) => {
+          const items = Array.isArray(params) ? params : [];
+          if (items.length === 0) return '';
+          const idx = (items[0] as { dataIndex?: number }).dataIndex ?? 0;
+          const pt = pts[idx];
+          const au = auMeta[idx];
+          const rows = items
+            .map((it) => {
+              const item = it as { marker?: string; seriesName?: string; value?: number };
+              const val =
+                typeof item.value === 'number'
+                  ? `$${item.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : '';
+              return `<div style="display:flex;justify-content:space-between;gap:16px;margin-top:4px;">
+                <span>${item.marker || ''}${item.seriesName || ''}</span>
+                <b style="color:#fff;">${val}</b>
+              </div>`;
+            })
+            .join('');
+          return `<div style="font-variant-numeric:tabular-nums;">
+            <div style="font-weight:700;color:#e2e8f0;">🇺🇸 美东：${pt.timestamp} ET</div>
+            <div style="font-size:11px;color:#38bdf8;margin-bottom:6px;">🇦🇺 澳洲：${au.fullAu}</div>
+            ${rows}
+          </div>`;
+        },
       },
       xAxis: {
         type: 'category',
         data: labels,
-        axisLabel: { color: '#94a3b8', fontSize: 11 },
+        axisLabel: {
+          color: '#cbd5e1',
+          fontSize: 10,
+          lineHeight: 15,
+          margin: 10,
+          rich: {
+            et: { color: '#cbd5e1', fontSize: 10.5, fontWeight: 600, lineHeight: 15 },
+            au: { color: '#38bdf8', fontSize: 10, lineHeight: 14 },
+          },
+        },
         splitLine: { show: false },
       },
       yAxis: {
@@ -122,7 +217,7 @@ export function AutoSimLabView({
             )}
           </div>
           <p className="text-xs text-slate-300">
-            每个美股交易日开盘时段（美东 09:40–15:40 ET，<b>每 30 分钟自动巡查一次，共 13 次/日</b>）拉取真实期权 Bid/Ask 盘口盯市：达{' '}
+            每个美股交易日开盘时段（美东 09:40–15:40 ET / <span className="text-sky-300">澳洲本地约 01:40–07:40 AEDT</span>，<b>每 30 分钟自动巡查一次，共 13 次/日</b>）拉取真实期权 Bid/Ask 盘口盯市：达{' '}
             <b className="text-emerald-300">{simState.config.take_profit_pct}% 净利自动止盈</b>、剩{' '}
             <b className="text-sky-300">≤{simState.config.dte_exit_threshold} 天自动平仓</b>、亏损达{' '}
             <b className="text-rose-300">{simState.config.stop_loss_mult}x 权利金自动止损</b>；非交易时段与美股节假日自动锁定不动仓。
@@ -245,18 +340,23 @@ export function AutoSimLabView({
       {/* Equity Curve + Config Side-by-Side */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="rounded-2xl border border-slate-800/90 bg-slate-900/65 p-4 xl:col-span-8">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-semibold text-white">
                 30天净值曲线 vs 标普500 (SPY) 基准走势
               </h3>
             </div>
-            <span className="text-xs text-slate-400 tabular-nums">
-              最近更新 (美东 ET)：{simState.last_updated_at}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 text-xs tabular-nums">
+              <span className="text-slate-400">
+                美东：{simState.last_updated_at.slice(5, 16)} ET
+              </span>
+              <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-300">
+                澳洲：{formatEtToAustralia(simState.last_updated_at).fullAu.slice(5)}
+              </span>
+            </div>
           </div>
-          <EChartBox option={equityChartOption} height="275px" />
+          <EChartBox option={equityChartOption} height="295px" />
         </div>
 
         <div className="flex flex-col justify-between rounded-2xl border border-slate-800/90 bg-slate-900/65 p-4 xl:col-span-4">
@@ -463,12 +563,17 @@ export function AutoSimLabView({
                 key={i}
                 className="rounded-lg border border-slate-800/80 bg-slate-950/60 p-2.5"
               >
-                <div className="flex items-center justify-between text-[10px] text-slate-400 tabular-nums">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 tabular-nums">
                   <span className="inline-flex items-center gap-1 font-semibold text-emerald-300">
                     <CheckCircle2 className="h-3 w-3" />
                     [{ev.event_type}] {ev.symbol}
                   </span>
-                  <span>{ev.timestamp}</span>
+                  <span>
+                    {ev.timestamp.slice(5, 16)} ET ·{' '}
+                    <span className="text-sky-300">
+                      澳 {formatEtToAustralia(ev.timestamp).shortAu}
+                    </span>
+                  </span>
                 </div>
                 <p className="mt-1 text-slate-300 leading-relaxed">{ev.summary}</p>
               </div>
