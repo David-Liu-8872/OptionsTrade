@@ -6,10 +6,13 @@ backend/.moomoo_home/
 backend/data/*.db
 backend/data/*.db-journal
 
-# Node / Vite
+# Node / Vite / Wrangler
 frontend/node_modules/
 frontend/dist/
 frontend/public/data/
+cloud-scheduler/node_modules/
+cloud-scheduler/.wrangler/
+cloud-scheduler/.dev.vars
 
 # OS / IDE
 .DS_Store

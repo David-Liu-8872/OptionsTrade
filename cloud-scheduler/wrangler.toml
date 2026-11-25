@@ -1,0 +1,9 @@
+name = "optionstrade-cron-trigger"
+main = "src/index.js"
+compatibility_date = "2026-03-01"
+workers_dev = true
+
+[triggers]
+# UTC Mon-Fri 13:07-21:37 every 30 mins (covers both US EDT and EST regular market + 16:07 ET close settlement)
+# Note: Cloudflare uses MON-FRI (numeric 1 is Sunday in Quartz, so always use MON-FRI!)
+crons = ["7,37 13-21 * * MON-FRI"]
