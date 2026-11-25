@@ -1,10 +1,10 @@
 {
   "started_at": "2026-11-24 11:23:37",
-  "last_updated_at": "2026-11-24 16:00:00",
-  "days_running": 1,
-  "total_runs": 6,
+  "last_updated_at": "2026-11-25 11:35:10",
+  "days_running": 2,
+  "total_runs": 7,
   "spy_entry_spot": 714.95,
-  "spy_current_spot": 718.78,
+  "spy_current_spot": 698.66,
   "config": {
     "initial_capital": 10000.0,
     "max_open_positions": 6,
@@ -29,19 +29,19 @@
       "JPM"
     ]
   },
-  "total_equity": 10035.68,
-  "total_return_dollars": 35.68,
-  "total_return_pct": 0.36,
-  "spy_return_pct": 0.54,
-  "cash_available": 7035.68,
+  "total_equity": 9760.68,
+  "total_return_dollars": -239.32,
+  "total_return_pct": -2.39,
+  "spy_return_pct": -2.28,
+  "cash_available": 6760.68,
   "collateral_locked": 3000.0,
-  "utilization_pct": 29.9,
+  "utilization_pct": 30.7,
   "realized_pnl_cum": 0.0,
-  "unrealized_pnl": 35.68,
+  "unrealized_pnl": -239.32,
   "win_count": 0,
   "loss_count": 0,
   "win_rate_pct": 0.0,
-  "max_drawdown_pct": 0.35,
+  "max_drawdown_pct": 2.74,
   "open_positions": [
     {
       "pos_id": "SIM-11250323-QQQ-565",
@@ -56,7 +56,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-31",
       "dte_at_entry": 37,
-      "current_dte": 37,
+      "current_dte": 36,
       "contracts": 1,
       "short_strike": 565.0,
       "long_strike": 560.0,
@@ -66,7 +66,7 @@
           "option_type": "PUT",
           "strike": 565.0,
           "entry_mid": 8.62,
-          "current_mark": 6.94,
+          "current_mark": 14.31,
           "iv_at_entry": 0.4155,
           "moomoo_code": "US.QQQ261231P00565000"
         },
@@ -75,13 +75,13 @@
           "option_type": "PUT",
           "strike": 560.0,
           "entry_mid": 7.82,
-          "current_mark": 6.3,
+          "current_mark": 13.29,
           "iv_at_entry": 0.42,
           "moomoo_code": "US.QQQ261231P00560000"
         }
       ],
       "spot_at_entry": 633.81,
-      "current_spot": 638.1,
+      "current_spot": 610.11,
       "breakeven_price": 564.21,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -91,10 +91,10 @@
       "entry_net_credit_dollars": 76.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 421.36,
-      "current_close_debit_dollars": 64.0,
+      "current_close_debit_dollars": 102.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 11.28,
-      "pnl_pct_of_credit": 14.7
+      "net_pnl_dollars": -26.72,
+      "pnl_pct_of_credit": -34.9
     },
     {
       "pos_id": "SIM-11250323-AMZN-225",
@@ -109,7 +109,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-24",
       "dte_at_entry": 30,
-      "current_dte": 30,
+      "current_dte": 29,
       "contracts": 1,
       "short_strike": 225.0,
       "long_strike": 220.0,
@@ -119,7 +119,7 @@
           "option_type": "PUT",
           "strike": 225.0,
           "entry_mid": 3.25,
-          "current_mark": 3.0,
+          "current_mark": 7.12,
           "iv_at_entry": 0.4537,
           "moomoo_code": "US.AMZN261224P00225000"
         },
@@ -128,13 +128,13 @@
           "option_type": "PUT",
           "strike": 220.0,
           "entry_mid": 2.37,
-          "current_mark": 2.24,
+          "current_mark": 5.7,
           "iv_at_entry": 0.46,
           "moomoo_code": "US.AMZN261224P00220000"
         }
       ],
       "spot_at_entry": 252.08,
-      "current_spot": 252.29,
+      "current_spot": 237.81,
       "breakeven_price": 224.13,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -144,10 +144,10 @@
       "entry_net_credit_dollars": 84.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 413.36,
-      "current_close_debit_dollars": 76.0,
+      "current_close_debit_dollars": 142.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 7.28,
-      "pnl_pct_of_credit": 8.6
+      "net_pnl_dollars": -58.72,
+      "pnl_pct_of_credit": -69.4
     },
     {
       "pos_id": "SIM-11250323-GLD-295",
@@ -162,7 +162,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-31",
       "dte_at_entry": 37,
-      "current_dte": 37,
+      "current_dte": 36,
       "contracts": 1,
       "short_strike": 295.0,
       "long_strike": 290.0,
@@ -172,7 +172,7 @@
           "option_type": "PUT",
           "strike": 295.0,
           "entry_mid": 3.03,
-          "current_mark": 3.28,
+          "current_mark": 5.98,
           "iv_at_entry": 0.3353,
           "moomoo_code": "US.GLD261231P00295000"
         },
@@ -181,13 +181,13 @@
           "option_type": "PUT",
           "strike": 290.0,
           "entry_mid": 2.42,
-          "current_mark": 2.59,
+          "current_mark": 4.9,
           "iv_at_entry": 0.3441,
           "moomoo_code": "US.GLD261231P00290000"
         }
       ],
       "spot_at_entry": 326.8,
-      "current_spot": 325.45,
+      "current_spot": 316.63,
       "breakeven_price": 294.4,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -197,10 +197,10 @@
       "entry_net_credit_dollars": 57.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 440.36,
-      "current_close_debit_dollars": 69.0,
+      "current_close_debit_dollars": 108.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": -12.72,
-      "pnl_pct_of_credit": -22.1
+      "net_pnl_dollars": -51.72,
+      "pnl_pct_of_credit": -89.7
     },
     {
       "pos_id": "SIM-11250323-AAPL-325",
@@ -215,7 +215,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-24",
       "dte_at_entry": 30,
-      "current_dte": 30,
+      "current_dte": 29,
       "contracts": 1,
       "short_strike": 325.0,
       "long_strike": 320.0,
@@ -225,7 +225,7 @@
           "option_type": "PUT",
           "strike": 325.0,
           "entry_mid": 2.93,
-          "current_mark": 2.37,
+          "current_mark": 4.21,
           "iv_at_entry": 0.3039,
           "moomoo_code": "US.AAPL261224P00325000"
         },
@@ -234,13 +234,13 @@
           "option_type": "PUT",
           "strike": 320.0,
           "entry_mid": 2.25,
-          "current_mark": 1.85,
+          "current_mark": 3.35,
           "iv_at_entry": 0.3135,
           "moomoo_code": "US.AAPL261224P00320000"
         }
       ],
       "spot_at_entry": 351.71,
-      "current_spot": 354.07,
+      "current_spot": 347.99,
       "breakeven_price": 324.33,
       "safety_score_at_entry": 81,
       "safety_grade_at_entry": "A",
@@ -250,10 +250,10 @@
       "entry_net_credit_dollars": 64.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 433.36,
-      "current_close_debit_dollars": 52.0,
+      "current_close_debit_dollars": 86.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 11.28,
-      "pnl_pct_of_credit": 17.5
+      "net_pnl_dollars": -22.72,
+      "pnl_pct_of_credit": -35.1
     },
     {
       "pos_id": "SIM-11250323-IWM-243",
@@ -268,7 +268,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-31",
       "dte_at_entry": 37,
-      "current_dte": 37,
+      "current_dte": 36,
       "contracts": 1,
       "short_strike": 243.0,
       "long_strike": 238.0,
@@ -278,7 +278,7 @@
           "option_type": "PUT",
           "strike": 243.0,
           "entry_mid": 2.88,
-          "current_mark": 2.37,
+          "current_mark": 3.75,
           "iv_at_entry": 0.3224,
           "moomoo_code": "US.IWM261231P00243000"
         },
@@ -287,13 +287,13 @@
           "option_type": "PUT",
           "strike": 238.0,
           "entry_mid": 2.27,
-          "current_mark": 1.84,
+          "current_mark": 2.97,
           "iv_at_entry": 0.3389,
           "moomoo_code": "US.IWM261231P00238000"
         }
       ],
       "spot_at_entry": 265.48,
-      "current_spot": 267.14,
+      "current_spot": 262.22,
       "breakeven_price": 242.4,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -303,10 +303,10 @@
       "entry_net_credit_dollars": 57.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 440.36,
-      "current_close_debit_dollars": 53.0,
+      "current_close_debit_dollars": 78.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 3.28,
-      "pnl_pct_of_credit": 5.7
+      "net_pnl_dollars": -21.72,
+      "pnl_pct_of_credit": -37.7
     },
     {
       "pos_id": "SIM-11250323-MSFT-445",
@@ -321,7 +321,7 @@
       "strategy_label": "牛市看跌价差 (Bull Put Spread)",
       "expiration": "2026-12-24",
       "dte_at_entry": 30,
-      "current_dte": 30,
+      "current_dte": 29,
       "contracts": 1,
       "short_strike": 445.0,
       "long_strike": 440.0,
@@ -331,7 +331,7 @@
           "option_type": "PUT",
           "strike": 445.0,
           "entry_mid": 5.17,
-          "current_mark": 5.0,
+          "current_mark": 9.5,
           "iv_at_entry": 0.4066,
           "moomoo_code": "US.MSFT261224P00445000"
         },
@@ -340,13 +340,13 @@
           "option_type": "PUT",
           "strike": 440.0,
           "entry_mid": 4.47,
-          "current_mark": 4.5,
+          "current_mark": 8.27,
           "iv_at_entry": 0.4134,
           "moomoo_code": "US.MSFT261224P00440000"
         }
       ],
       "spot_at_entry": 495.55,
-      "current_spot": 496.13,
+      "current_spot": 479.84,
       "breakeven_price": 444.31,
       "safety_score_at_entry": 79,
       "safety_grade_at_entry": "A",
@@ -356,10 +356,10 @@
       "entry_net_credit_dollars": 66.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 431.36,
-      "current_close_debit_dollars": 50.0,
+      "current_close_debit_dollars": 123.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 15.28,
-      "pnl_pct_of_credit": 22.9
+      "net_pnl_dollars": -57.72,
+      "pnl_pct_of_credit": -86.6
     }
   ],
   "closed_positions": [],
@@ -377,66 +377,6 @@
       "open_positions_count": 0
     },
     {
-      "timestamp": "2026-11-24 11:23:37",
-      "date": "2026-11-24",
-      "total_equity": 9979.84,
-      "cash_available": 6979.84,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": -20.16,
-      "spy_benchmark_equity": 10001.26,
-      "drawdown_pct": 0.2,
-      "open_positions_count": 6
-    },
-    {
-      "timestamp": "2026-11-24 11:43:24",
-      "date": "2026-11-24",
-      "total_equity": 9989.68,
-      "cash_available": 6989.68,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": -10.32,
-      "spy_benchmark_equity": 9981.96,
-      "drawdown_pct": 0.1,
-      "open_positions_count": 6
-    },
-    {
-      "timestamp": "2026-11-24 12:03:14",
-      "date": "2026-11-24",
-      "total_equity": 9966.68,
-      "cash_available": 6966.68,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": -33.32,
-      "spy_benchmark_equity": 9996.78,
-      "drawdown_pct": 0.33,
-      "open_positions_count": 6
-    },
-    {
-      "timestamp": "2026-11-24 12:13:51",
-      "date": "2026-11-24",
-      "total_equity": 10000.68,
-      "cash_available": 7000.68,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": 0.68,
-      "spy_benchmark_equity": 10049.37,
-      "drawdown_pct": 0.0,
-      "open_positions_count": 6
-    },
-    {
-      "timestamp": "2026-11-24 12:25:53",
-      "date": "2026-11-24",
-      "total_equity": 10023.68,
-      "cash_available": 7023.68,
-      "collateral_locked": 3000.0,
-      "realized_pnl_cum": 0.0,
-      "unrealized_pnl": 23.68,
-      "spy_benchmark_equity": 10046.86,
-      "drawdown_pct": 0.0,
-      "open_positions_count": 6
-    },
-    {
       "timestamp": "2026-11-24 16:00:00",
       "date": "2026-11-24",
       "total_equity": 10035.68,
@@ -447,9 +387,28 @@
       "spy_benchmark_equity": 10053.57,
       "drawdown_pct": 0.0,
       "open_positions_count": 6
+    },
+    {
+      "timestamp": "2026-11-25 11:35:10",
+      "date": "2026-11-25",
+      "total_equity": 9760.68,
+      "cash_available": 6760.68,
+      "collateral_locked": 3000.0,
+      "realized_pnl_cum": 0.0,
+      "unrealized_pnl": -239.32,
+      "spy_benchmark_equity": 9772.15,
+      "drawdown_pct": 2.74,
+      "open_positions_count": 6
     }
   ],
   "activity_log": [
+    {
+      "timestamp": "2026-11-25 11:35:10",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $-239.32，总净值 $9,760.68",
+      "pnl_dollars": null
+    },
     {
       "timestamp": "2026-11-24 16:00:00",
       "event_type": "MARK",
