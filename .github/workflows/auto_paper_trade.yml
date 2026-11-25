@@ -2,12 +2,9 @@ name: US Options 30-Day Auto Paper Trader
 
 on:
   schedule:
-    # 美股交易日盘中每 30 分钟自动巡查 (采用原生美东时区 + 错峰质数分钟 :07/:37，避开 :00/:10/:30/:40 全球拥堵丢单)
-    - cron: '7,37 9-15 * * 1-5'
-      timezone: 'America/New_York'
-    # 美股收盘结算专班 (美东 16:07 ET，记录当日收盘最终净值，不开新仓)
-    - cron: '7 16 * * 1-5'
-      timezone: 'America/New_York'
+    # 美股交易日 (周一至周五) UTC 13:07–21:37 每 30 分钟触发一次 (完整覆盖美东夏令时 EDT 与冬令时 EST 盘中 + 16:07 ET 收盘结算)
+    # 采用标准 POSIX UTC 语法 + 错峰质数分钟 (:07/:37)，Python 引擎内部精确校验 America/New_York 开盘与节假日门禁
+    - cron: '7,37 13-21 * * 1-5'
   push:
     branches:
       - main
@@ -73,31 +70,30 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           NOTIFY_ONLY_TRADES: ${{ secrets.NOTIFY_ONLY_TRADES }}
         run: |
-          EXTRA_ARGS="--export-static"
           if [ "${{ github.event_name }}" = "push" ]; then
-            EXTRA_ARGS="$EXTRA_ARGS --skip-sim"
+            uv run --directory backend python scripts/run_auto_sim.py --skip-sim --export-static
           else
+            EXTRA_ARGS=""
             if [ "${{ github.event.inputs.mark_only }}" = "true" ]; then
               EXTRA_ARGS="$EXTRA_ARGS --mark-only"
             fi
             if [ "${{ github.event.inputs.force_when_closed }}" = "true" ]; then
               EXTRA_ARGS="$EXTRA_ARGS --force"
             fi
+            uv run --directory backend python scripts/run_auto_sim.py $EXTRA_ARGS
           fi
-          uv run --directory backend python scripts/run_auto_sim.py $EXTRA_ARGS
 
-      - name: Check if portfolio changed (skip Pages rebuild on closed-market cron ticks)
+      - name: Check if Pages UI needs rebuild (only on code/UI push)
         id: check_changes
         run: |
-          if git diff --quiet data/sim_portfolio.json && [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "should_publish=false" >> "$GITHUB_OUTPUT"
-            echo "Market closed / no portfolio changes on scheduled tick; skipping commit & Pages rebuild."
-          else
+          if [ "${{ github.event_name }}" = "push" ]; then
             echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit updated 30-day portfolio state back to repo
-        if: steps.check_changes.outputs.should_publish == 'true'
+        if: github.event_name != 'push'
         run: |
           git config user.name "options-sim-bot[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

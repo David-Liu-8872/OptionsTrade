@@ -111,11 +111,40 @@ export const apiClient = {
   deletePaperTrade: (id: number) =>
     requestJson<{ ok: boolean }>(`/api/journal/${id}`, { method: 'DELETE' }),
 
-  getSimPortfolio: () =>
-    fetchWithStaticFallback<SimPortfolioState>(
-      '/api/sim/portfolio',
-      './data/sim_portfolio.json'
-    ),
+  getSimPortfolio: async (): Promise<{
+    data: SimPortfolioState;
+    isStatic: boolean;
+  }> => {
+    try {
+      const data = await requestJson<SimPortfolioState>('/api/sim/portfolio');
+      return { data, isStatic: false };
+    } catch {
+      // Static GitHub Pages mode: fetch live committed portfolio directly from GitHub main branch
+      // so updates appear within seconds of git push without waiting for Pages artifact rebuilds or CDN cache
+      const liveUrls = [
+        'https://api.github.com/repos/David-Liu-8872/OptionsTrade/contents/data/sim_portfolio.json?ref=main',
+        `https://raw.githubusercontent.com/David-Liu-8872/OptionsTrade/main/data/sim_portfolio.json?t=${Date.now()}`,
+        `./data/sim_portfolio.json?t=${Date.now()}`,
+      ];
+      for (const u of liveUrls) {
+        try {
+          const headers: Record<string, string> = u.includes('api.github.com')
+            ? { Accept: 'application/vnd.github.raw+json' }
+            : {};
+          const res = await fetch(u, { headers, cache: 'no-store' });
+          if (res.ok) {
+            const data = (await res.json()) as SimPortfolioState;
+            if (data && Array.isArray(data.equity_curve)) {
+              return { data, isStatic: true };
+            }
+          }
+        } catch {
+          // try next fallback URL
+        }
+      }
+      throw new Error('Simulation portfolio data unavailable');
+    }
+  },
 
   runSimCycle: (markOnly = false) =>
     requestJson<SimPortfolioState>(

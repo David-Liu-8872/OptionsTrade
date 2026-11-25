@@ -122,6 +122,23 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-refresh portfolio every 3 minutes & whenever user returns to the browser tab
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      loadSimPortfolio();
+    }, 180_000);
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        loadSimPortfolio();
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, [loadSimPortfolio]);
+
   const handleRunSimCycle = async (markOnly = false) => {
     setRunningSimCycle(true);
     try {
