@@ -1,10 +1,10 @@
 {
   "started_at": "2026-11-24 11:23:37",
-  "last_updated_at": "2026-11-27 10:37:38",
+  "last_updated_at": "2026-11-27 11:07:37",
   "days_running": 4,
-  "total_runs": 12,
+  "total_runs": 13,
   "spy_entry_spot": 714.95,
-  "spy_current_spot": 724.69,
+  "spy_current_spot": 725.25,
   "config": {
     "initial_capital": 10000.0,
     "max_open_positions": 6,
@@ -29,15 +29,15 @@
       "JPM"
     ]
   },
-  "total_equity": 10529.88,
-  "total_return_dollars": 529.88,
-  "total_return_pct": 5.3,
-  "spy_return_pct": 1.36,
-  "cash_available": 7529.88,
+  "total_equity": 10554.52,
+  "total_return_dollars": 554.52,
+  "total_return_pct": 5.55,
+  "spy_return_pct": 1.44,
+  "cash_available": 7554.52,
   "collateral_locked": 3000.0,
-  "utilization_pct": 28.5,
+  "utilization_pct": 28.4,
   "realized_pnl_cum": 462.84,
-  "unrealized_pnl": 67.04,
+  "unrealized_pnl": 91.68,
   "win_count": 3,
   "loss_count": 0,
   "win_rate_pct": 100.0,
@@ -66,7 +66,7 @@
           "option_type": "PUT",
           "strike": 225.0,
           "entry_mid": 3.25,
-          "current_mark": 3.02,
+          "current_mark": 2.54,
           "iv_at_entry": 0.4537,
           "moomoo_code": "US.AMZN261224P00225000"
         },
@@ -75,13 +75,13 @@
           "option_type": "PUT",
           "strike": 220.0,
           "entry_mid": 2.37,
-          "current_mark": 2.3,
+          "current_mark": 1.91,
           "iv_at_entry": 0.46,
           "moomoo_code": "US.AMZN261224P00220000"
         }
       ],
       "spot_at_entry": 252.08,
-      "current_spot": 252.29,
+      "current_spot": 254.0,
       "breakeven_price": 224.13,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -91,10 +91,10 @@
       "entry_net_credit_dollars": 84.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 413.36,
-      "current_close_debit_dollars": 72.0,
+      "current_close_debit_dollars": 63.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 11.28,
-      "pnl_pct_of_credit": 13.3
+      "net_pnl_dollars": 20.28,
+      "pnl_pct_of_credit": 24.0
     },
     {
       "pos_id": "SIM-11250323-GLD-295",
@@ -119,7 +119,7 @@
           "option_type": "PUT",
           "strike": 295.0,
           "entry_mid": 3.03,
-          "current_mark": 2.35,
+          "current_mark": 2.21,
           "iv_at_entry": 0.3353,
           "moomoo_code": "US.GLD261231P00295000"
         },
@@ -128,13 +128,13 @@
           "option_type": "PUT",
           "strike": 290.0,
           "entry_mid": 2.42,
-          "current_mark": 1.86,
+          "current_mark": 1.75,
           "iv_at_entry": 0.3441,
           "moomoo_code": "US.GLD261231P00290000"
         }
       ],
       "spot_at_entry": 326.8,
-      "current_spot": 332.7,
+      "current_spot": 331.79,
       "breakeven_price": 294.4,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -144,10 +144,10 @@
       "entry_net_credit_dollars": 57.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 440.36,
-      "current_close_debit_dollars": 49.0,
+      "current_close_debit_dollars": 46.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 7.28,
-      "pnl_pct_of_credit": 12.6
+      "net_pnl_dollars": 10.28,
+      "pnl_pct_of_credit": 17.8
     },
     {
       "pos_id": "SIM-11250323-AAPL-325",
@@ -172,7 +172,7 @@
           "option_type": "PUT",
           "strike": 325.0,
           "entry_mid": 2.93,
-          "current_mark": 1.78,
+          "current_mark": 1.56,
           "iv_at_entry": 0.3039,
           "moomoo_code": "US.AAPL261224P00325000"
         },
@@ -181,13 +181,13 @@
           "option_type": "PUT",
           "strike": 320.0,
           "entry_mid": 2.25,
-          "current_mark": 1.4,
+          "current_mark": 1.19,
           "iv_at_entry": 0.3135,
           "moomoo_code": "US.AAPL261224P00320000"
         }
       ],
       "spot_at_entry": 351.71,
-      "current_spot": 358.38,
+      "current_spot": 358.89,
       "breakeven_price": 324.33,
       "safety_score_at_entry": 81,
       "safety_grade_at_entry": "A",
@@ -197,10 +197,10 @@
       "entry_net_credit_dollars": 64.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 433.36,
-      "current_close_debit_dollars": 38.0,
+      "current_close_debit_dollars": 37.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 25.28,
-      "pnl_pct_of_credit": 39.1
+      "net_pnl_dollars": 26.28,
+      "pnl_pct_of_credit": 40.7
     },
     {
       "pos_id": "SIM-11250323-IWM-243",
@@ -225,7 +225,7 @@
           "option_type": "PUT",
           "strike": 243.0,
           "entry_mid": 2.88,
-          "current_mark": 1.61,
+          "current_mark": 1.4,
           "iv_at_entry": 0.3224,
           "moomoo_code": "US.IWM261231P00243000"
         },
@@ -234,13 +234,13 @@
           "option_type": "PUT",
           "strike": 238.0,
           "entry_mid": 2.27,
-          "current_mark": 1.26,
+          "current_mark": 1.09,
           "iv_at_entry": 0.3389,
           "moomoo_code": "US.IWM261231P00238000"
         }
       ],
       "spot_at_entry": 265.48,
-      "current_spot": 272.46,
+      "current_spot": 272.32,
       "breakeven_price": 242.4,
       "safety_score_at_entry": 80,
       "safety_grade_at_entry": "A",
@@ -250,10 +250,10 @@
       "entry_net_credit_dollars": 57.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 440.36,
-      "current_close_debit_dollars": 35.0,
+      "current_close_debit_dollars": 31.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 21.28,
-      "pnl_pct_of_credit": 36.9
+      "net_pnl_dollars": 25.28,
+      "pnl_pct_of_credit": 43.9
     },
     {
       "pos_id": "SIM-11271007-MSFT-435",
@@ -278,7 +278,7 @@
           "option_type": "PUT",
           "strike": 435.0,
           "entry_mid": 4.62,
-          "current_mark": 4.77,
+          "current_mark": 4.4,
           "iv_at_entry": 0.3969,
           "moomoo_code": "US.MSFT261231P00435000"
         },
@@ -287,13 +287,13 @@
           "option_type": "PUT",
           "strike": 430.0,
           "entry_mid": 3.75,
-          "current_mark": 4.0,
+          "current_mark": 3.75,
           "iv_at_entry": 0.4059,
           "moomoo_code": "US.MSFT261231P00430000"
         }
       ],
       "spot_at_entry": 490.39,
-      "current_spot": 491.51,
+      "current_spot": 490.34,
       "breakeven_price": 434.14,
       "safety_score_at_entry": 77,
       "safety_grade_at_entry": "B+",
@@ -303,10 +303,10 @@
       "entry_net_credit_dollars": 83.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 414.36,
-      "current_close_debit_dollars": 77.0,
+      "current_close_debit_dollars": 65.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": 5.28,
-      "pnl_pct_of_credit": 6.3
+      "net_pnl_dollars": 17.28,
+      "pnl_pct_of_credit": 20.7
     },
     {
       "pos_id": "SIM-11271037-QQQ-580",
@@ -331,7 +331,7 @@
           "option_type": "PUT",
           "strike": 580.0,
           "entry_mid": 7.85,
-          "current_mark": 7.85,
+          "current_mark": 7.04,
           "iv_at_entry": 0.393,
           "moomoo_code": "US.QQQ261231P00580000"
         },
@@ -340,13 +340,13 @@
           "option_type": "PUT",
           "strike": 575.0,
           "entry_mid": 7.25,
-          "current_mark": 7.25,
+          "current_mark": 6.41,
           "iv_at_entry": 0.401,
           "moomoo_code": "US.QQQ261231P00575000"
         }
       ],
       "spot_at_entry": 644.63,
-      "current_spot": 644.63,
+      "current_spot": 645.01,
       "breakeven_price": 579.41,
       "safety_score_at_entry": 82,
       "safety_grade_at_entry": "A",
@@ -356,10 +356,10 @@
       "entry_net_credit_dollars": 56.64,
       "collateral_required": 500.0,
       "max_loss_dollars": 441.36,
-      "current_close_debit_dollars": 58.0,
+      "current_close_debit_dollars": 63.0,
       "exit_fee_dollars": 1.36,
-      "net_pnl_dollars": -3.36,
-      "pnl_pct_of_credit": -5.9
+      "net_pnl_dollars": -7.72,
+      "pnl_pct_of_credit": -13.6
     }
   ],
   "closed_positions": [
@@ -595,9 +595,28 @@
       "spy_benchmark_equity": 10136.23,
       "drawdown_pct": 0.0,
       "open_positions_count": 6
+    },
+    {
+      "timestamp": "2026-11-27 11:07:37",
+      "date": "2026-11-27",
+      "total_equity": 10554.52,
+      "cash_available": 7554.52,
+      "collateral_locked": 3000.0,
+      "realized_pnl_cum": 462.84,
+      "unrealized_pnl": 91.68,
+      "spy_benchmark_equity": 10144.07,
+      "drawdown_pct": 0.0,
+      "open_positions_count": 6
     }
   ],
   "activity_log": [
+    {
+      "timestamp": "2026-11-27 11:07:37",
+      "event_type": "MARK",
+      "symbol": "PORTFOLIO",
+      "summary": "盘中 30 分钟实时盘口盯市：在途 6 笔，浮动盈亏 $+91.68，总净值 $10,554.52",
+      "pnl_dollars": null
+    },
     {
       "timestamp": "2026-11-27 10:37:38",
       "event_type": "CLOSE",
